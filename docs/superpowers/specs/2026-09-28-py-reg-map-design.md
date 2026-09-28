@@ -584,6 +584,10 @@ Prints (or writes to `FILE`) the JSON Schema of the YAML format.
   `example/vms1511.yaml` byte-for-byte.
 - **CI:** GitHub Actions runs `ruff check`, `ruff format --check` and `pytest` on Python 3.12,
   3.13 and 3.14.
+- **Line endings in git:** `.gitattributes` marks `example/**` and `src/regmap/templates/**` as
+  `-text` (stored and checked out byte-for-byte, CRLF preserved), so the byte-identical tests
+  pass on Linux CI and on Windows regardless of `core.autocrlf`. Templates are read with
+  newline normalization anyway, so a project template with LF endings also works.
 - If the July 2024 reference outputs turn out to differ from the October 2024 workbook, the
   reference test shows it; each such case is resolved explicitly (documented difference or
   regenerated reference).
