@@ -21,6 +21,16 @@ pytest
 GitHub Actions (`.github/workflows/ci.yml`) runs the same three commands on Python 3.12, 3.13
 and 3.14 for every push and pull request.
 
+## Building and publishing
+
+`build.bat` (Windows, run from anywhere) runs the tests, cleans `dist/` and `build/`, and builds
+the sdist and wheel into `dist/` with `python -m build`. `build.bat upload` additionally
+publishes them to PyPI with `twine`. It needs `build` and `twine` in `.venv`:
+
+```sh
+.venv\Scripts\python -m pip install build twine
+```
+
 ## Project layout
 
 | path | responsibility |

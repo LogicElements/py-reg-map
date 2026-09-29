@@ -37,3 +37,7 @@ regmap schema -o Documents/regmap.schema.json
 ```
 
 Documentation: [doc/index.md](doc/index.md).
+
+## License
+
+[MIT](LICENSE) © 2026 Logic Elements s.r.o
