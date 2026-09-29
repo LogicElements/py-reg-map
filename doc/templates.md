@@ -22,6 +22,9 @@ generator:
 A file there with one of the names above is used instead of the default; missing files fall
 back to the defaults, so a project overrides only what it needs.
 
+If `generator.templates` is set, the directory must exist; otherwise generation stops with an
+error (a typo must not silently fall back to the defaults).
+
 Rules for custom templates:
 
 - Every placeholder of the template must be present exactly as written above; a missing

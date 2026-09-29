@@ -131,3 +131,25 @@ def test_emitted_map_loads_back():
     assert reg[0].bits[0].description == "Any, error"
     assert reg[1].values[0].label == "9600"
     assert (reg[2].max, reg[2].modbus) == (1023, False)
+
+
+def test_keyword_like_item_names_are_quoted():
+    doc = {
+        "device": {"name": "Dev"},
+        "blocks": {
+            "SYS": {
+                "code": 0,
+                "registers": [
+                    {
+                        "name": "M",
+                        "type": "ENUM",
+                        "access": "RW",
+                        "size": 1,
+                        "values": [{"name": "ON"}, {"name": "NULL", "label": "x"}],
+                    }
+                ],
+            }
+        },
+    }
+    values = load_map_text(emit_map(doc)).blocks["SYS"].registers[0].values
+    assert [v.name for v in values] == ["ON", "NULL"]

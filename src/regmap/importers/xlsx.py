@@ -3,11 +3,13 @@
 import os
 import re
 import warnings
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import openpyxl
+from openpyxl.utils.exceptions import InvalidFileException
 
 from regmap.importers.yaml_emit import HexInt, emit_map
 from regmap.model import MapError, load_map_text
@@ -126,7 +128,11 @@ def _read_blocks(sheet) -> dict[str, dict[str, Any]]:
     start = next((i for i, r in enumerate(rows) if any(_norm(v) == "block id" for v in r)), None)
     if start is None:
         raise ImportFailed(["Common sheet: 'Block ID' table not found"])
-    head = next(i for i in range(start, len(rows)) if any(_norm(v) == "abbrev." for v in rows[i]))
+    head = next(
+        (i for i in range(start, len(rows)) if any(_norm(v) == "abbrev." for v in rows[i])), None
+    )
+    if head is None:
+        raise ImportFailed(["Common sheet: header row with 'Abbrev.' not found"])
     cols = _columns(rows[head], BLOCK_COLUMNS, "Common sheet")
     blocks = {}
     for row in rows[head + 1 :]:
@@ -183,8 +189,11 @@ class _Importer:
         self.vba_counter = {"INPUT": 0, "HOLD": 0}
 
     def run(self) -> ImportResult:
-        values = _open(self.workbook, data_only=True)
-        formulas = _open(self.workbook, data_only=False)
+        try:
+            values = _open(self.workbook, data_only=True)
+            formulas = _open(self.workbook, data_only=False)
+        except (zipfile.BadZipFile, InvalidFileException, KeyError) as exc:
+            raise ImportFailed([f"cannot read the workbook: {exc}"]) from None
         for name in ("Registers", "Common"):
             if name not in values.sheetnames:
                 raise ImportFailed([f"sheet '{name}' not found"])

@@ -71,7 +71,7 @@ def _field(out: list[str], indent: str, key: str, value: Any) -> None:
 
 def _item_line(item: dict[str, Any], name_width: int) -> str:
     """One flow mapping per enum value / bit, columns aligned like a table."""
-    name = f"name: {item['name']}"
+    name = f"name: {scalar(item['name'], flow=True)}"
     number = next((k for k in ("value", "bit") if item.get(k) is not None), None)
     texts = [f"{k}: {scalar(item[k], flow=True)}" for k in ("label", "description") if item.get(k)]
     if number is None and not texts:
@@ -99,7 +99,7 @@ def _register(out: list[str], reg: dict[str, Any]) -> None:
     for key in ("values", "bits"):
         items = reg.get(key)
         if items:
-            width = max(len(i["name"]) for i in items)
+            width = max(len(scalar(i["name"], flow=True)) for i in items)
             out.append(f"        {key}:")
             out += [f"          - {_item_line(i, width)}" for i in items]
 
@@ -119,7 +119,7 @@ def emit_map(doc: dict[str, Any]) -> str:
             out += [f"    {k}: {scalar(v)}" for k, v in generator["outputs"].items()]
     out += ["", "blocks:"]
     for abbrev, block in doc["blocks"].items():
-        out += ["", f"  {abbrev}:", f"    code: {block['code']}"]
+        out += ["", f"  {scalar(abbrev)}:", f"    code: {block['code']}"]
         for key in ("name", "description"):
             if block.get(key):
                 _field(out, "    ", key, block[key])

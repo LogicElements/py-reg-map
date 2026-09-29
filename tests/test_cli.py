@@ -120,3 +120,26 @@ def test_relative_map_path_writes_next_to_the_map(tmp_path, monkeypatch):
     assert (project / "reg_map.h").is_file()
     assert (project / "py" / "DevRegs.py").is_file()
     assert list(elsewhere.iterdir()) == []
+
+
+def test_non_utf8_map_is_a_clean_error(tmp_path, capsys):
+    path = tmp_path / "dev.yaml"
+    path.write_bytes(map_yaml(BLOCKS, extra="# Žluťoučký\n").encode("cp1250"))
+    assert main(["generate", str(path)]) == 1
+    assert capsys.readouterr().err.startswith("error: ")
+
+
+def test_unwritable_destination_is_a_clean_error(tmp_path, capsys):
+    (tmp_path / "taken").write_text("a file, not a directory")
+    path = tmp_path / "dev.yaml"
+    path.write_text(map_yaml(BLOCKS, extra="generator: {outputs: {reg_map: taken}}\n"))
+    assert main(["generate", str(path)]) == 1
+    assert capsys.readouterr().err.startswith("error: ")
+
+
+def test_missing_templates_directory_is_an_error(tmp_path, capsys):
+    path = tmp_path / "dev.yaml"
+    path.write_text(map_yaml(BLOCKS, extra="generator: {templates: nodir}\n"))
+    assert main(["generate", str(path)]) == 1
+    assert "templates directory" in capsys.readouterr().err
+    assert not (tmp_path / "reg_map.h").exists()

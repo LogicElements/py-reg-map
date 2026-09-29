@@ -237,3 +237,24 @@ def test_items_after_a_stop_row_are_not_attached(tmp_path):
     result, rmap = run(tmp_path, rows)
     assert [v.name for v in rmap.blocks["SYS"].registers[0].values] == ["M_A"]
     assert result.warnings == ["row 5: item LOST has no register above it, ignored"]
+
+
+def test_not_an_excel_file_is_a_clean_error(tmp_path, capsys):
+    bogus = tmp_path / "Dev.xlsx"
+    bogus.write_text("not a zip")
+    assert main(["import-xlsx", str(bogus)]) == 1
+    assert "import failed" in capsys.readouterr().err
+
+
+def test_enum_and_bit_names_that_look_like_yaml_keywords(tmp_path):
+    rows = [
+        reg("MODE", "SYS", "ENUM", "RW", 0, 1),
+        item("ON"),
+        item("NULL"),
+        reg("FLAGS", "SYS", "BIN", "RO", 1, 1),
+        item("OFF"),
+    ]
+    _, rmap = run(tmp_path, rows)
+    mode, flags = rmap.blocks["SYS"].registers
+    assert [v.name for v in mode.values] == ["ON", "NULL"]
+    assert [b.name for b in flags.bits] == ["OFF"]

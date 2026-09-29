@@ -6,7 +6,7 @@ from pathlib import Path
 from regmap.generators import c_modbus, c_regmap, lebin_json, modbus_json, python_regs
 from regmap.model import GeneratorSettings
 from regmap.resolve import ResolvedMap
-from regmap.templating import fill, load_template
+from regmap.templating import TemplateError, fill, load_template
 
 OUTPUT_KEYS = ("reg_map", "modbus", "lebin_json", "modbus_json", "python")
 
@@ -32,6 +32,8 @@ def render_outputs(
 ) -> list[OutputFile]:
     """All output files; ``base_dir`` is the YAML file's directory."""
     project = base_dir / settings.templates if settings.templates else None
+    if project is not None and not project.is_dir():
+        raise TemplateError(f"generator.templates: templates directory {project} does not exist")
 
     def c_file(key: str, template: str, output: str, fragments: dict[str, str]) -> OutputFile:
         text = fill(load_template(template, project), fragments, template)
