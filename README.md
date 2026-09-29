@@ -1,5 +1,10 @@
 # py-reg-map
 
+[![PyPI](https://img.shields.io/pypi/v/py-reg-map)](https://pypi.org/project/py-reg-map/)
+[![Python](https://img.shields.io/pypi/pyversions/py-reg-map)](https://pypi.org/project/py-reg-map/)
+[![CI](https://github.com/LogicElements/py-reg-map/actions/workflows/ci.yml/badge.svg)](https://github.com/LogicElements/py-reg-map/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/pypi/l/py-reg-map)](LICENSE)
+
 Register map generator for embedded firmware. A YAML file describes the device registers;
 `regmap` generates the C storage and Modbus RTU sources for the firmware (`reg_map.h/.c`,
 `mb_rtu_app.h/.c`) and the JSON definitions for the LeBin and Modbus RTU communication
@@ -7,11 +12,17 @@ software.
 
 ## Installation
 
-Python 3.12 or newer:
+Python 3.12 or newer. Install from [PyPI](https://pypi.org/project/py-reg-map/):
+
+```sh
+pip install py-reg-map
+pip install "py-reg-map[xlsx]"   # with Excel import
+```
+
+The latest development version comes straight from GitHub:
 
 ```sh
 pip install "py-reg-map @ git+https://github.com/LogicElements/py-reg-map"
-pip install "py-reg-map[xlsx] @ git+https://github.com/LogicElements/py-reg-map"   # with Excel import
 ```
 
 ## Usage
@@ -36,7 +47,11 @@ Editor completion for the YAML format:
 regmap schema -o Documents/regmap.schema.json
 ```
 
-Documentation: [doc/index.md](doc/index.md).
+## Documentation
+
+Start at [doc/index.md](doc/index.md): [YAML format](doc/yaml-format.md),
+[command line](doc/cli.md), [outputs](doc/outputs.md) and
+[development guide](doc/development.md).
 
 ## License
 
