@@ -1,7 +1,7 @@
 # py-reg-map — Register Map Generator: Design
 
 - **Date:** 2026-09-28
-- **Status:** Approved in brainstorming, pending written-spec review
+- **Status:** Approved (2026-09-29); refined while writing the implementation plan
 - **Repository:** https://github.com/LogicElements/py-reg-map (private)
 
 ## 1. Context
@@ -72,7 +72,8 @@ py-reg-map/
                               #   EnumValue, Bit, ModbusOptions (+ field validation)
     codes.py                  # type/access codes, ID composition, block count (26)
     resolve.py                # RegisterMap -> ResolvedMap (all derived values, cross-checks)
-    templates.py              # template lookup (project dir > package default), placeholder fill
+    templating.py             # template lookup (project dir > package default), placeholder fill
+    outputs.py                # renders all output files in memory, decides destinations
     check.py                  # stability check against previous JSON outputs
     writer.py                 # CRLF + UTF-8 writing, skip unchanged files, --check comparison
     generators/
@@ -346,7 +347,7 @@ register full names, all bit names and all enum value names in the map.
   - `<lower(c_storage)>_t conf;` + two empty lines;
   - `uint8_t* const <S>[<S>_BLOCK_NUMBER] = {` + for each of 26 codes `(uint8_t*)&conf.<block lower>, ` or `NULL, ` + `};` + empty line;
   - `const uint32_t <S>_LIMIT[<S>_BLOCK_NUMBER] = {` / block ends (`0` for unused) joined by `, ` with trailing `, ` / `};` / empty line;
-  - `_FLASH`, `_LOGGER`, `_CALIB`, `_SYNCED` arrays in the same shape (`<c_prefix><FULL>, ` items on one line; empty arrays have an empty items line).
+  - `_FLASH`, `_LOGGER`, `_CALIB`, `_SYNCED` arrays in the same shape (`<c_prefix><FULL>, ` items on one line; an empty array is the `= {` line directly followed by `};`).
 - `REG MAP FACTORY` — per register with `default`, two-space indent:
   - `INT`/`BIN`/`ENUM`: macro by size — 1 → `BYTE`, 2 → `SHORT`, otherwise `INT`;
     `<c_prefix><MACRO>(<c_prefix><FULL>)` padded so that ` = ` is aligned (left part width =
@@ -360,7 +361,7 @@ register full names, all bit names and all enum value names in the map.
 
 - `MODBUS INPUT DEFINE` / `MODBUS HOLD DEFINE`: `#define MB_INPUT_FIRST    0` (resp.
   `MB_HOLD_FIRST     0`), empty line, per allocated word
-  `#define MB_<SPACE>_<FULL>[_<j>]` + spaces to width (W + 14 − len(define name)) + `<addr>u`
+  `#define MB_<SPACE>_<FULL>[_<j>]` + spaces to width (W + 14 − len(define name), at least one) + `<addr>u`
   (suffix `_<j>` only when the register has more than one word), empty line,
   `#define MB_INPUT_LAST     <n>` (resp. `MB_HOLD_LAST      <n>`).
 
@@ -478,8 +479,9 @@ One constant per register (full name), then one class per ENUM register with its
 13. All outputs order blocks by `code` (VBA used sheet order except for C structs).
 14. `MB_*_LAST` is the highest allocated address (VBA: counter − 1; equal unless an explicit
     address jumps backwards).
+15. Descriptions lose trailing spaces at line ends (the importer right-trims them).
 
-For VMS-1511 only differences 1–4 are observable.
+For VMS-1511 only differences 1–4 and 15 are observable.
 
 ## 10. CLI
 
@@ -538,8 +540,9 @@ Prints (or writes to `FILE`) the JSON Schema of the YAML format.
   Only blocks that have registers are imported.
 - **Row classification** (as VBA): row with `Data Type` and `Name source` → register; following
   rows without `Data Type` but with `Name` → items of the previous ENUM/BIN register (ignored
-  with a warning for other types); `stop` and empty rows skipped; rows with `Invalid` set are
-  skipped with a warning.
+  with a warning for other types); a row with `Data Type` but without `Name source` (e.g. `stop`)
+  ends the item list, later orphan items are ignored with a warning; empty rows are skipped; rows
+  with `Invalid` set are skipped with a warning together with their items.
 - **Conversion:**
   - `address` written only if it differs from the automatic address;
   - ENUM: default converted to the value name; item `Factory value` → `value:`; sheet min/max
@@ -582,7 +585,7 @@ Prints (or writes to `FILE`) the JSON Schema of the YAML format.
   - `reg_map.h/.c`, `mb_rtu_app.h/.c`: byte-identical to `example/`;
   - `Vms1511Regs.py`: byte-identical after stripping the BOM from the reference;
   - both JSON files: parsed and compared as objects after applying the documented differences
-    (§9 items 1–2) to the reference; nothing else may differ.
+    (§9 items 1, 2 and 15) to the reference; nothing else may differ.
 - **Import test:** `import-xlsx example/Vms1511.xlsm` must reproduce the committed
   `example/vms1511.yaml` byte-for-byte.
 - **CI:** GitHub Actions runs `ruff check`, `ruff format --check` and `pytest` on Python 3.12,
