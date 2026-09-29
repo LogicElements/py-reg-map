@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "py-reg-map"
+version = "0.1.0"
+description = "Register map generator for embedded firmware (C storage, LeBin and Modbus RTU JSON)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["pyyaml>=6", "pydantic>=2.6"]
+
+[project.optional-dependencies]
+xlsx = ["openpyxl>=3.1"]
+dev = ["pytest>=8", "ruff>=0.6", "openpyxl>=3.1"]
+
+[project.scripts]
+regmap = "regmap.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/regmap"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["example", "doc"]  # VBA reference outputs are kept byte-for-byte; docs are prose
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]  # inline YAML test data reads better unwrapped
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]

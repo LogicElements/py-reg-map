@@ -1,0 +1,5 @@
+* text=auto
+
+# Reference files and templates are compared byte-for-byte (CRLF): never convert them.
+example/** -text
+src/regmap/templates/** -text
