@@ -57,3 +57,62 @@ Modbus word (suffix `_0`, `_1`, … for registers with more than one word), and
 - write holding: the matching assignment (`(<enum>_t)value` for enums,
   `((float)((int16_t)value)) / 10` for FLOAT ×10) and `id = CONF_X;` on the last word, so the
   firmware applies the register once it is complete.
+
+## LeBin JSON — `<name>_registers.json`
+
+A list with one object per register:
+
+| key | value |
+|---|---|
+| `Category` | block abbreviation |
+| `Name` | register name without the block |
+| `Label` | label or `""` |
+| `Id` | register ID (decimal) |
+| `VarType` | type |
+| `Access` | access; `RWIF` is written as `RWF` |
+| `Description` | description + legend |
+| `Value`, `NewValue` | default as a string (`""` when none, enums as their number) |
+| `EnumStr`, `EnumValue` | ENUM and BIN only: labels and values / bit numbers (empty lists for BIN without bits) |
+| `Reset` | same as `Value` |
+| `Min`, `Max` | only when set in the YAML |
+| `Units` | unit or `""` |
+
+## Modbus JSON — `<name>_Modbus.json`
+
+A list with one object per register exposed on Modbus:
+
+| key | value |
+|---|---|
+| `Type` | `INPUT` or `HOLD` |
+| `Name` | full name |
+| `Id` | register ID (decimal) |
+| `Address` | list of Modbus addresses |
+| `Format` | type; `FLOAT32` for `format: F32` |
+| `Value` | default as a number (0 when none; enums as their number; strings as text) |
+| `Access` | access as written |
+| `Min`, `Max` | `min`/`max` or 0; derived for ENUM |
+| `Unit`, `Label` | text or `""` |
+| `EnumStr`, `EnumValue` | ENUM and BIN only |
+| `Description` | description + legend |
+
+## Legend in descriptions
+
+ENUM registers and BIN registers with bits get a legend appended to `Description`: an empty
+line separator when the register has a description, then `Allowed values: ` (ENUM) or
+`Meaning of respective bits: ` (BIN) and one line per item, `<label> - <description>.` or
+`<label>.` when the item has no description. The item prefix is `""` / `[<bit>] - ` in LeBin
+JSON and `Value <n> - ` / `Bit <n> - ` in Modbus JSON. Line breaks are written as `\r\n`.
+
+## `<name>Regs.py`
+
+A class `<name>Regs` with one string constant per register full name, then one class per ENUM
+register with its values:
+
+```python
+class Vms1511Regs:
+    SYS_UPTIME = "SYS_UPTIME"
+
+
+class COM_MB_BAUD_RATE:
+    MB_BAUD_9600 = 0
+```
