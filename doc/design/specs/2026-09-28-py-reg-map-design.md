@@ -62,6 +62,8 @@ py-reg-map/
   pyproject.toml              # package "py-reg-map", console script "regmap", requires-python >=3.12
   README.md                   # basics only: what it is, install, usage (§14.1)
   doc/                        # structured reference documentation (§14.2)
+    design/specs/             # design specs (this file)
+    design/plans/             # implementation plans
   .github/workflows/ci.yml    # ruff + pytest on Python 3.12, 3.13, 3.14
   src/regmap/
     __init__.py               # __version__
@@ -86,7 +88,6 @@ py-reg-map/
     templates/                # reg_map_temp.h/.c, mb_rtu_app_temp.h/.c (moved from /template)
   tests/
   example/                    # reference inputs/outputs (existing files) + vms1511.yaml
-  docs/superpowers/specs/
 ```
 
 The existing top-level `template/` directory moves to `src/regmap/templates/` unchanged.
@@ -621,6 +622,7 @@ Generator behavior, formats and all other details live in `doc/` (English, Markd
 | `doc/import-xlsx.md` | Excel migration: expected sheet layout, row classification, value conversion, warnings, ID verification. |
 | `doc/differences-from-vba.md` | The intentional differences from the VBA outputs (§9). |
 | `doc/development.md` | Dev setup, project layout, tests (unit, reference, import), CI, `.gitattributes` line-ending rule. |
+| `doc/design/` | Design specs (`specs/`) and implementation plans (`plans/`); not user documentation. |
 
 The docs are written together with the code they describe (each implementation task updates
 its doc page), not as a final step.
