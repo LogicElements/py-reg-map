@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from regmap.model import MapError, RegisterMap, load_map_text
+from regmap.resolve import ResolvedMap, resolve
 
 EXAMPLE = Path(__file__).resolve().parents[1] / "example"
 
@@ -20,8 +21,12 @@ def load(blocks: str, **kwargs: str) -> RegisterMap:
     return load_map_text(map_yaml(blocks, **kwargs))
 
 
+def resolved(blocks: str, **kwargs: str) -> ResolvedMap:
+    return resolve(load(blocks, **kwargs))
+
+
 def errors(blocks: str, **kwargs: str) -> list[str]:
-    """Messages of the MapError raised while loading ``blocks``."""
+    """Messages of the MapError raised while loading or resolving ``blocks``."""
     with pytest.raises(MapError) as exc:
-        load(blocks, **kwargs)
+        resolve(load(blocks, **kwargs))
     return exc.value.errors
