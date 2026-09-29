@@ -40,3 +40,20 @@ names.
   `CONF_BYTE/SHORT/INT(...) = n;` by size, `CONF_FLOAT(...) = 2.0;` (1–6 decimals),
   `memcpy(CONF_PTR(...), "text", sizeof("text"));` for strings. ENUM defaults are written as
   numbers.
+
+## `mb_rtu_app.h`
+
+`MB_INPUT_FIRST` / `MB_HOLD_FIRST`, one `#define MB_<INPUT|HOLD>_<full name>[_<n>] <addr>u` per
+Modbus word (suffix `_0`, `_1`, … for registers with more than one word), and
+`MB_INPUT_LAST` / `MB_HOLD_LAST`.
+
+## `mb_rtu_app.c`
+
+`case` entries for the three callbacks:
+
+- read input / read holding: `*value = conf.<block>.<member>;` for one-word registers,
+  `*value = *((uint16_t *)CONF_PTR(CONF_X) + j);` per word of longer registers and
+  `*value = (int16_t)(10 * conf.<block>.<member>);` for FLOAT ×10;
+- write holding: the matching assignment (`(<enum>_t)value` for enums,
+  `((float)((int16_t)value)) / 10` for FLOAT ×10) and `id = CONF_X;` on the last word, so the
+  firmware applies the register once it is complete.
