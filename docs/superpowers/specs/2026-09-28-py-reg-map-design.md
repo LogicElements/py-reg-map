@@ -51,6 +51,7 @@ with AI tools, and the generator is bound to Excel on Windows.
 | 10 | Python ≥ 3.12. Code, comments, messages, README in English. |
 | 11 | `FACT_SERIAL_NUMBER` stays a special member of the CALIB list. |
 | 12 | Output destinations and template directory live in an optional `generator:` section of the YAML. |
+| 13 | `README.md` holds only basics (what, install, usage); all behavior and format details live in structured Markdown files in `doc/`. |
 
 ## 5. Architecture
 
@@ -59,7 +60,8 @@ with AI tools, and the generator is bound to Excel on Windows.
 ```
 py-reg-map/
   pyproject.toml              # package "py-reg-map", console script "regmap", requires-python >=3.12
-  README.md
+  README.md                   # basics only: what it is, install, usage (§14.1)
+  doc/                        # structured reference documentation (§14.2)
   .github/workflows/ci.yml    # ruff + pytest on Python 3.12, 3.13, 3.14
   src/regmap/
     __init__.py               # __version__
@@ -594,8 +596,31 @@ Prints (or writes to `FILE`) the JSON Schema of the YAML format.
 
 ## 14. Documentation
 
-`README.md`: installation (`pip install "py-reg-map[xlsx] @ git+https://github.com/LogicElements/py-reg-map"`),
-quick start (`import-xlsx`, `generate`), YAML format reference (§6), template override, the
-stability check and `--allow-id-change`, VS Code schema setup (`regmap schema -o regmap.schema.json`
-plus a `# yaml-language-server: $schema=regmap.schema.json` first line in the map; the importer
-does not add this line).
+### 14.1 `README.md` — basics only
+
+- What the package is (2–3 sentences) and which outputs it produces.
+- Installation: `pip install "py-reg-map[xlsx] @ git+https://github.com/LogicElements/py-reg-map"`
+  (the `xlsx` extra only for `import-xlsx`).
+- Usage: `regmap import-xlsx`, `regmap generate` (incl. `--check`, `--allow-id-change`),
+  `regmap schema` — one short example each.
+- Link to `doc/index.md` for everything else.
+
+### 14.2 `doc/` — structured reference
+
+Generator behavior, formats and all other details live in `doc/` (English, Markdown):
+
+| file | content |
+|---|---|
+| `doc/index.md` | Overview, data flow (YAML → model → resolved map → outputs), table of contents. |
+| `doc/yaml-format.md` | Full YAML reference: top level, `device`, `generator`, blocks, registers, enum values, bits, `modbus`; validation rules; example. VS Code schema setup (`regmap schema -o regmap.schema.json` + `# yaml-language-server: $schema=regmap.schema.json` first line; the importer does not add this line). |
+| `doc/derived-values.md` | Full names, addresses, ID composition, C member types, block sizes, enum ranges, Modbus allocation, flash/calib lists. |
+| `doc/outputs.md` | Every output file: C placeholders and fragment formats, LeBin JSON keys, Modbus JSON keys, Python class; encoding and line endings. |
+| `doc/templates.md` | Default templates, project override via `generator.templates`, placeholder list, rules for custom templates. |
+| `doc/cli.md` | Commands, options, destinations (`generator.outputs`, `--out`), exit codes. |
+| `doc/stability-check.md` | What counts as a breaking change, how the check reads previous outputs, `--allow-id-change`. |
+| `doc/import-xlsx.md` | Excel migration: expected sheet layout, row classification, value conversion, warnings, ID verification. |
+| `doc/differences-from-vba.md` | The intentional differences from the VBA outputs (§9). |
+| `doc/development.md` | Dev setup, project layout, tests (unit, reference, import), CI, `.gitattributes` line-ending rule. |
+
+The docs are written together with the code they describe (each implementation task updates
+its doc page), not as a final step.
