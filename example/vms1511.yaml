@@ -1,0 +1,349 @@
+# Register map Vms1511
+#
+# Source of truth for the regmap generator. Derived values are not written here:
+#   full name     <BLOCK>_<name>        (SYS + UPTIME -> SYS_UPTIME, C macro CONF_SYS_UPTIME)
+#   address       end of the previous register in the block (override: address)
+#   register ID   0xBB AAA T A L        (block, address, type, access, log2(size))
+#   ENUM min/max  range of its values
+#   Modbus        RO/ROF -> input, others -> holding, in order (override: modbus: {address: N})
+#
+# type:   BIN | INT | FLOAT | STRING | ENUM
+# access: RO | ROF | RW | RWF | RWIF
+# Format: https://github.com/LogicElements/py-reg-map/blob/main/doc/yaml-format.md
+
+device:
+  name: Vms1511
+
+generator:
+  outputs:
+    reg_map: ../Firmware/Vms1511-APP/Core/Common
+    modbus: ../Firmware/Vms1511-APP/Core/Serial
+    lebin_json: ../Tests/vms-1511
+    modbus_json: ../Tests/vms-1511
+    python: ../Tests/vms-1511
+
+blocks:
+
+  SYS:
+    code: 0
+    name: SYSTEM
+    description: System MCU features, small BSP, RTOS etc.
+    registers:
+      - name: UPTIME
+        type: INT
+        access: RO
+        size: 4
+        label: Uptime
+        default: 0
+        unit: s
+        description: Elapsed seconds from device startup
+
+      - name: REGMAP_VERSION
+        type: INT
+        access: ROF
+        size: 4
+        label: Register map version
+        default: 1001
+        min: 1001
+        max: 5050
+        description: |-
+          Version of register map in format xxxyyy.
+          Xxx - major version of register map.
+          Yyy - minor version of register map.
+          Major version defines compatibility of different register maps. If major version of register map changes, the values previously stored in the flash memory are discarded and factory values are used
+
+      - name: STATUS
+        type: BIN
+        access: RO
+        size: 4
+        label: Status register
+        description: Binary map of different status flags
+        bits:
+          - {name: STAT_BIT_ERROR,        bit: 0,  label: Generic error, description: Error in the device}
+          - {name: STAT_BIT_TESTING,      bit: 1,  label: Testing mode, description: Testing mode is enabled}
+          - {name: STAT_BIT_CALIBRATION,  bit: 2,  label: Calibrated successfully, description: Calibration data read successfully}
+          - {name: STAT_BIT_MB_TIMEOUT,   bit: 3,  label: Modbus timeout, description: No modbus communication for timeout period}
+          - {name: STAT_BIT_CONFIG_FLASH, bit: 16, label: Configuration flash error, description: Error when working with configuration memory}
+          - {name: STAT_BIT_WATCHDOG,     bit: 17, label: Reset by IWDG, description: Last reset was caused by Independent watchdog}
+
+      - name: COMMAND
+        type: INT
+        access: RW
+        size: 4
+        label: Command
+        min: 0
+        max: 9901
+        description: |-
+          Following commands are supported:
+          Value 9901 - Reset
+          Value 8801 - Factory reset
+          Value 7701 - Testing mode
+          Value 66xx - Invoke error
+          Value 5501 - Invoke watchdog reset
+
+      - name: TEST
+        type: INT
+        access: RW
+        size: 4
+        label: Testing register
+        description: Generic system testing register
+
+      - name: IO_INPUT
+        type: INT
+        access: RO
+        size: 2
+        label: Input signals
+        min: 0
+        max: 0x3FF
+        description: |-
+          Set of input signals.
+          Bits 0-4 - Modbus address offset
+          Bits 5-8 - Bootstrap
+          Bit 9 - Pushbutton
+
+  FACT:
+    code: 1
+    name: FACTORY_BTL
+    description: Device and bootloader information hardcoded from factory (Flash - read only)
+    registers:
+      - name: SERIAL_NUMBER
+        type: INT
+        access: RO
+        size: 4
+        label: Serial number
+        description: |-
+          Serial number of product with common device ID in format xxyyzzzz.
+          Xx - year of production
+          Yy - month of production
+          zzzz - serial incremental number of the product
+
+      - name: DEVICE_ID
+        type: INT
+        access: RO
+        size: 4
+        label: Product number
+        min: 9153
+        max: 9153
+        description: Unique device ID
+
+      - name: HW_REVISION
+        type: INT
+        access: RO
+        size: 4
+        label: Hardware version
+        min: 1001
+        max: 5099
+        description: |-
+          Hardware revision of the device defined as xxxyyy:
+          xxx - major revision (letter)
+          yyy - minor revision (number)
+
+      - name: BOOT_REVISION
+        type: INT
+        access: RO
+        size: 4
+        label: Bootloader version
+        min: 1001
+        max: 5099
+        description: |-
+          Firmware revision of the bootloader as number xxxyyy:
+          xxx - major version of bootloader
+          yyy - minor version of bootloader
+
+  FIRM:
+    code: 2
+    name: FIRMWARE_APP
+    description: Firmware information hardcoded at firmware update (Flash - read only)
+    registers:
+      - name: REVISION
+        type: INT
+        access: RO
+        size: 4
+        label: Firmware revision
+        min: 1
+        max: 999
+        description: Firmware revision of the current application image as an incremental number. See list of FW revision or release notes for respective features.
+
+      - name: ASSEMBLY_INFO
+        type: INT
+        access: RO
+        size: 4
+        label: Assembly date
+        min: 20231100
+        max: 20250330
+        description: |-
+          Assembly information of the current application in format xxxxyyzz:
+          xxxx - year of FW build
+          yy - month of FW build
+          zz - day of FW build
+
+      - name: APP_CHECKSUM
+        type: INT
+        access: RO
+        size: 4
+        label: CRC checksum
+        description: CRC checksum of the current application
+
+      - name: APP_SIZE
+        type: INT
+        access: RO
+        size: 4
+        label: Firmware size
+        min: 10000
+        max: 32000
+        description: Firmware size of the current application in bytes
+
+  COM:
+    code: 3
+    name: COMMUNICATION
+    description: Modbus communication parameters
+    registers:
+      - name: MB_BAUD_RATE
+        type: ENUM
+        access: RWF
+        size: 1
+        label: Modbus baud rate
+        default: MB_BAUD_19200
+        description: Modbus RTU serial port baud rate
+        values:
+          - {name: MB_BAUD_9600,   label: "9600", description: 9600 baud/s}
+          - {name: MB_BAUD_19200,  label: "19200", description: 19200 baud/s}
+          - {name: MB_BAUD_38400,  label: "38400", description: 38400 baud/s}
+          - {name: MB_BAUD_57600,  label: "57600", description: 57600 baud/s}
+          - {name: MB_BAUD_115200, label: "115200", description: 115200 baud/s}
+
+      - name: MB_PARITY
+        type: ENUM
+        access: RWF
+        size: 1
+        label: Modbus parity
+        default: MB_PARITY_EVEN
+        description: Modbus RTU serial port parity
+        values:
+          - {name: MB_PARITY_NONE, label: NONE, description: NONE parity}
+          - {name: MB_PARITY_EVEN, label: EVEN, description: EVEN parity}
+          - {name: MB_PARITY_ODD,  label: ODD, description: ODD parity}
+
+      - name: MB_STOP_BITS
+        type: ENUM
+        access: RWF
+        size: 1
+        label: Modbus stop bits
+        default: MB_STOP_1
+        description: Modbus RTU serial port - number of stop bits
+        values:
+          - {name: MB_STOP_1, label: 1 stop bit, description: 1 stop bit}
+          - {name: MB_STOP_2, label: 2 stop bits, description: 2 stop bits}
+
+      - name: RESERVED
+        type: INT
+        access: RW
+        size: 1
+        modbus: false
+
+      - name: MB_ADDRESS
+        type: INT
+        access: RO
+        size: 2
+        label: Modbus slave address
+        default: 32
+        min: 32
+        max: 63
+        modbus: false
+        description: Modbus RTU serial port slave address
+
+      - name: MB_APPLY
+        type: INT
+        access: RW
+        size: 2
+        label: Apply modbus parameters
+        min: 0
+        max: 1
+        description: |-
+          Apply new modbus communication parameters.
+          Value 1 - Apply new settings
+
+      - name: MB_TIMEOUT
+        type: INT
+        access: RWF
+        size: 2
+        label: Modbus timeout
+        default: 10
+        min: 0
+        max: 7200
+        unit: s
+        description: |-
+          Longer silent period implies connection lost.
+          Zero value disables timeout indication.
+
+  CALIB:
+    code: 4
+    name: CALIBRATION
+    description: Calibration data and handling
+    registers:
+      - name: MODE
+        type: INT
+        access: RW
+        size: 2
+        label: Calibration mode
+        default: 0
+        min: 0
+        max: 24
+        description: |-
+          Set calibration resistance values to all channels.
+          Value 0 - calibration disabled
+          Value 1 - 8 - 100k low values 0 - 7
+          Value 9 - 16 - 100k FS values 31, 63, … 255
+          Value 17 - 24 - 2 x 1k FS values 31, 63, … 255
+
+      - name: RESERVED
+        type: INT
+        access: RW
+        size: 2
+        label: Reserved
+        description: Reserved for future use
+
+  AMP:
+    code: 5
+    name: AMPLIFIER
+    description: Amplifier configuration
+    registers:
+      - name: GAIN
+        type: ENUM
+        access: RWF
+        size: 1
+        label: Amplifier gain
+        default: GAIN_1
+        modbus: {address: 100}
+        values:
+          - {name: GAIN_1,  label: Gain 1 x}
+          - {name: GAIN_3,  label: Gain 3 x}
+          - {name: GAIN_10, label: Gain 10 x}
+          - {name: GAIN_20, label: Gain 20 x}
+
+      - name: LOAD
+        type: ENUM
+        access: RWF
+        size: 1
+        label: Input Load
+        default: LOAD_100R
+        values:
+          - {name: LOAD_100R, label: Load 100 Ohm}
+          - {name: LOAD_1k,   label: Load 1 kOhm}
+          - {name: LOAD_2k,   label: Load 2 kOhm}
+          - {name: LOAD_10k,  label: Load 10 kOhm}
+
+  DBG:
+    code: 6
+    name: DEBUG
+    description: Debug information
+    registers:
+      - name: WRITES_CONF
+        type: INT
+        access: RO
+        size: 4
+        label: Configuration writes
+        min: 0
+        max: 1000000
+        unit: writes
+        description: Number of writes into internal configuration flash memory (size 4kB, entry 128 B, total endurance 10000 * 4096 / 128 = 320000)
