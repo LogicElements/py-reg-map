@@ -2,7 +2,7 @@
 
 - **Date:** 2026-09-28
 - **Status:** Approved in brainstorming, pending written-spec review
-- **Repository:** https://github.com/jan-bartovsky/py-reg-map (private)
+- **Repository:** https://github.com/LogicElements/py-reg-map (private)
 
 ## 1. Context
 
@@ -594,7 +594,7 @@ Prints (or writes to `FILE`) the JSON Schema of the YAML format.
 
 ## 14. Documentation
 
-`README.md`: installation (`pip install "py-reg-map[xlsx] @ git+https://github.com/jan-bartovsky/py-reg-map"`),
+`README.md`: installation (`pip install "py-reg-map[xlsx] @ git+https://github.com/LogicElements/py-reg-map"`),
 quick start (`import-xlsx`, `generate`), YAML format reference (§6), template override, the
 stability check and `--allow-id-change`, VS Code schema setup (`regmap schema -o regmap.schema.json`
 plus a `# yaml-language-server: $schema=regmap.schema.json` first line in the map; the importer
