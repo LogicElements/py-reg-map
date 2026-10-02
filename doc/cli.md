@@ -1,11 +1,22 @@
 # Command line
 
 ```
+regmap init NAME [-o MAP.yaml] [--force]
 regmap generate MAP.yaml [--out DIR] [--allow-id-change] [--check]
 regmap import-xlsx WORKBOOK.xlsm [-o MAP.yaml] [--force]
 regmap schema [-o FILE]
 regmap --version
 ```
+
+## `init`
+
+Creates a new register map for a device called `NAME` (a C identifier; it becomes
+`device.name` and the output file names). The default file is `<name lowercase>.yaml` in the
+current directory; an existing file is only overwritten with `--force`.
+
+The map is a starter map with the registers every device needs, a `generator` section listing
+all parameters (every output next to the YAML file) and the format reference in the header.
+Edit it, then run `regmap generate`.
 
 ## `generate`
 

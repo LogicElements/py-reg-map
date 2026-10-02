@@ -38,8 +38,11 @@ cross-object checks) → `outputs.py` (render everything in memory) → `writer.
 - `check.py`: **stability check**. Before writing, new LeBin/Modbus JSON is compared with the
   previously generated JSON; changed IDs/Modbus addresses or removed registers abort with exit 1
   unless `--allow-id-change` is passed.
+- `scaffold.py` + `templates/init_template.yaml`: `regmap init`. The YAML is *generated* from
+  `example/Template.xlsm` (`regmap import-xlsx example/Template.xlsm -o src/regmap/templates/init_template.yaml --force`);
+  edit the workbook, not the YAML. `tests/test_init.py` enforces the sync.
 - `importers/`: `xlsx.py` (Excel → YAML migration) and `yaml_emit.py` (readable YAML writer).
-- `cli.py`: `regmap generate | import-xlsx | schema`. Errors are reported as `error: ...` on stderr;
+- `cli.py`: `regmap generate | init | import-xlsx | schema`. Errors are reported as `error: ...` on stderr;
   exit 1 for map/template/breaking-change problems, 2 for missing file.
 
 ## Testing and byte-exact files

@@ -1,4 +1,4 @@
-"""Command line interface: regmap generate | import-xlsx | schema."""
+"""Command line interface: regmap generate | init | import-xlsx | schema."""
 
 import argparse
 import json
@@ -8,9 +8,10 @@ from pathlib import Path
 
 from regmap import __version__
 from regmap.check import PreviousOutputError, breaking_changes, format_changes
-from regmap.model import MapError, RegisterMap, load_map
+from regmap.model import MapError, RegisterMap, load_map, load_map_text
 from regmap.outputs import render_outputs
 from regmap.resolve import resolve
+from regmap.scaffold import new_map_text
 from regmap.templating import TemplateError
 from regmap.writer import encode, stale, write
 
@@ -72,6 +73,24 @@ def _schema(args: argparse.Namespace) -> int:
     return 0
 
 
+def _init(args: argparse.Namespace) -> int:
+    target: Path = args.output or Path(args.name.lower() + ".yaml")
+    if target.exists() and not args.force:
+        _error(f"{target} already exists; use --force to overwrite it")
+        return 1
+    text = new_map_text(args.name)
+    try:
+        resolve(load_map_text(text, str(target)))
+    except MapError as exc:  # in practice an invalid device name
+        _error(f"{args.name}: not usable as a device name")
+        for message in exc.errors:
+            print(f"  {message}", file=sys.stderr)
+        return 1
+    target.write_bytes(encode(text))
+    print(f"written   {target}")
+    return 0
+
+
 def _import_xlsx(args: argparse.Namespace) -> int:
     try:
         from regmap.importers.xlsx import ImportFailed, import_workbook
@@ -113,6 +132,12 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--allow-id-change", action="store_true", help="accept breaking changes")
     gen.add_argument("--check", action="store_true", help="only check that outputs are current")
     gen.set_defaults(func=_generate)
+
+    ini = sub.add_parser("init", help="create a new register map from the starter map")
+    ini.add_argument("name", help="device name (C identifier), used for output file names")
+    ini.add_argument("-o", "--output", type=Path, help="YAML file to write (default: <name>.yaml)")
+    ini.add_argument("--force", action="store_true", help="overwrite an existing YAML file")
+    ini.set_defaults(func=_init)
 
     imp = sub.add_parser("import-xlsx", help="convert a legacy Excel register map to YAML")
     imp.add_argument("workbook", type=Path, help="Excel workbook (.xlsm/.xlsx)")

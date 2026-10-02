@@ -27,6 +27,12 @@ pip install "py-reg-map @ git+https://github.com/LogicElements/py-reg-map"
 
 ## Usage
 
+Start a new register map:
+
+```sh
+regmap init MyDevice                              # -> mydevice.yaml
+```
+
 Migrate an existing Excel register map (once):
 
 ```sh

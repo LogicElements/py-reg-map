@@ -45,6 +45,7 @@ publishes them to PyPI with `twine`. It needs `build` and `twine` in `.venv`:
 | `src/regmap/writer.py` | CRLF + UTF-8 writing, unchanged files are not rewritten, `--check` comparison. |
 | `src/regmap/check.py` | Stability check against the previous JSON outputs. |
 | `src/regmap/cli.py` | `regmap` command line. |
+| `src/regmap/scaffold.py` | Starter map for `regmap init`. |
 | `src/regmap/importers/` | Excel import (`xlsx.py`) and the readable YAML writer (`yaml_emit.py`). |
 | `example/` | VMS-1511 workbook, its VBA outputs (reference) and `vms1511.yaml`. |
 | `doc/design/` | Design specs and implementation plans. |
@@ -57,6 +58,19 @@ publishes them to PyPI with `twine`. It needs `build` and `twine` in `.venv`:
   outputs in `example/`: C files byte-for-byte, JSON after the documented differences
   (`doc/differences-from-vba.md`). It also checks that importing `example/Vms1511.xlsm`
   reproduces `example/vms1511.yaml` exactly.
+
+## Starter map for `regmap init`
+
+`src/regmap/templates/init_template.yaml` is imported from `example/Template.xlsm`; edit the
+starter registers in that workbook, never the YAML by hand. After a change regenerate it:
+
+```sh
+regmap import-xlsx example/Template.xlsm -o src/regmap/templates/init_template.yaml --force
+```
+
+`regmap init` (`src/regmap/scaffold.py`) renames the device `Template`, and replaces the
+workbook's `generator` section with one listing all outputs as `.`. `tests/test_init.py` fails
+when the YAML no longer matches the workbook.
 
 ## Line endings
 
