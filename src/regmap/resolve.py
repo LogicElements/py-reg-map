@@ -72,6 +72,8 @@ class ResolvedBlock:
     code: int
     registers: tuple[ResolvedRegister, ...]
     end: int  # max(address + size); 0 for a block without registers
+    name: str = ""  # documentation only
+    description: str = ""
 
 
 @dataclass(frozen=True)
@@ -168,7 +170,14 @@ class _Resolver:
                 )
             offset = max(offset, address + reg.size)
             registers.append(self._register(abbrev, block.code, reg, address, path))
-        return ResolvedBlock(abbrev, block.code, tuple(registers), offset)
+        return ResolvedBlock(
+            abbrev,
+            block.code,
+            tuple(registers),
+            offset,
+            _text(block.name),
+            _text(block.description),
+        )
 
     def _unique(self, table: dict[str, str], key: str, shown: str, path: str) -> None:
         if key in table:

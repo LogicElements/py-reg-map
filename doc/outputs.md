@@ -1,6 +1,6 @@
 # Outputs
 
-`regmap generate` writes seven files. All of them are UTF-8 without BOM with CRLF line
+`regmap generate` writes eight files. All of them are UTF-8 without BOM with CRLF line
 endings. The C files and the Python file of VMS-1511 are byte-identical to the former VBA
 outputs; the JSON files differ only as listed in
 [differences-from-vba.md](differences-from-vba.md).
@@ -12,10 +12,27 @@ outputs; the JSON files differ only as listed in
 | `lebin_json` | `<name>_registers.json` |
 | `modbus_json` | `<name>_Modbus.json` |
 | `python` | `<name>Regs.py` |
+| `html` | `<name>_registers.html` |
 
 Blocks appear in `code` order, registers in YAML order. Column alignment in the C files uses
 the width `W` = the longest name among all register full names, bit names and enum value
 names.
+
+## `<name>_registers.html`
+
+A single self-contained page (no external files, light and dark theme) for people who work
+with the map: open it in a browser or attach it to a release.
+
+- One table per block with every register: full name, ID, address, type, access, size,
+  default, range, unit, Modbus space and address, label and description. The values of an
+  ENUM and the bits of a BIN register unfold under the register.
+- Search over names, labels and descriptions, filters by type and access and a
+  "Modbus only" switch; blocks without a match are hidden.
+- A Modbus map: input and holding registers sorted by address, each linking to its register.
+
+The file contains no date or version, so it only changes when the map does and works with
+`--check`. `generator.outputs.html: false` turns it off. Projects upgraded from a version
+without this output will see it reported as outdated by `--check` until it is generated once.
 
 ## `reg_map.h`
 

@@ -33,6 +33,7 @@ def test_file_names_and_default_destination(tmp_path):
         ("lebin_json", "Dev_registers.json"),
         ("modbus_json", "Dev_Modbus.json"),
         ("python", "DevRegs.py"),
+        ("html", "Dev_registers.html"),
     ]
     assert "#define CONF_SYS_A " in files[0].text
 
@@ -48,6 +49,7 @@ def test_configured_destinations_and_project_templates(tmp_path):
     assert sorted(files) == [
         "DevRegs.py",
         "Dev_Modbus.json",
+        "Dev_registers.html",
         "fw/common/reg_map.c",
         "fw/common/reg_map.h",
         "fw/serial/mb_rtu_app.c",
@@ -55,6 +57,11 @@ def test_configured_destinations_and_project_templates(tmp_path):
         "tests/Dev_registers.json",
     ]
     assert files["fw/common/reg_map.c"].text.startswith("// project\nconf_reg_t conf;\n")
+
+
+def test_html_output_can_be_disabled(tmp_path):
+    files = outputs(tmp_path, extra="generator:\n  outputs:\n    html: false\n")
+    assert "html" not in {o.key for o in files}
 
 
 def test_out_dir_overrides_configured_destinations(tmp_path):

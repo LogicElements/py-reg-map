@@ -263,6 +263,7 @@ class Outputs(_Strict):
     lebin_json: Text | None = None
     modbus_json: Text | None = None
     python: Text | None = None
+    html: Text | Literal[False] | None = None  # False: do not write the HTML table
 
 
 class GeneratorSettings(_Strict):

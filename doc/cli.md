@@ -23,7 +23,7 @@ The first line points editors to `regmap.schema.json`, which `init` writes next 
 ## `generate`
 
 1. Loads and validates the map; all problems are printed at once.
-2. Renders all seven outputs in memory (templates from `generator.templates`, otherwise the
+2. Renders all eight outputs in memory (templates from `generator.templates`, otherwise the
    package defaults — see [templates.md](templates.md)).
 3. Destinations: `generator.outputs.<key>` relative to the YAML file, otherwise the YAML
    file's directory. `--out DIR` writes everything to `DIR` instead.

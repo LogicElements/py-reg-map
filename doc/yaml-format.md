@@ -85,6 +85,7 @@ The storage variable is always called `conf`.
 | `outputs.lebin_json` | Directory for `<name>_registers.json`. |
 | `outputs.modbus_json` | Directory for `<name>_Modbus.json`. |
 | `outputs.python` | Directory for `<name>Regs.py`. |
+| `outputs.html` | Directory for `<name>_registers.html`; `false` does not write it. |
 
 Paths are relative to the YAML file; use forward slashes. A missing entry means the YAML
 file's directory. `regmap generate --out DIR` ignores all of them.

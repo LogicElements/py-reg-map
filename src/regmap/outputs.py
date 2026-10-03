@@ -3,12 +3,12 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from regmap.generators import c_modbus, c_regmap, lebin_json, modbus_json, python_regs
+from regmap.generators import c_modbus, c_regmap, html_doc, lebin_json, modbus_json, python_regs
 from regmap.model import GeneratorSettings
 from regmap.resolve import ResolvedMap
 from regmap.templating import TemplateError, fill, load_template
 
-OUTPUT_KEYS = ("reg_map", "modbus", "lebin_json", "modbus_json", "python")
+OUTPUT_KEYS = ("reg_map", "modbus", "lebin_json", "modbus_json", "python", "html")
 
 
 @dataclass(frozen=True)
@@ -42,7 +42,7 @@ def render_outputs(
     def data_file(key: str, filename: str, text: str) -> OutputFile:
         return OutputFile(key, destination(key, settings, base_dir, out_dir) / filename, text)
 
-    return [
+    files = [
         c_file("reg_map", "reg_map_temp.h", "reg_map.h", c_regmap.header_fragments(rmap)),
         c_file("reg_map", "reg_map_temp.c", "reg_map.c", c_regmap.source_fragments(rmap)),
         c_file("modbus", "mb_rtu_app_temp.h", "mb_rtu_app.h", c_modbus.header_fragments(rmap)),
@@ -51,3 +51,6 @@ def render_outputs(
         data_file("modbus_json", f"{rmap.name}_Modbus.json", modbus_json.render(rmap)),
         data_file("python", f"{rmap.name}Regs.py", python_regs.render(rmap)),
     ]
+    if settings.outputs.html is not False:
+        files.append(data_file("html", f"{rmap.name}_registers.html", html_doc.render(rmap)))
+    return files

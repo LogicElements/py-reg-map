@@ -18,15 +18,15 @@ def map_file(tmp_path):
 
 def test_generate_writes_then_reports_unchanged(map_file, capsys):
     assert main(["generate", str(map_file)]) == 0
-    assert capsys.readouterr().out.count("written") == 7
+    assert capsys.readouterr().out.count("written") == 8
     assert (map_file.parent / "reg_map.h").is_file()
     assert main(["generate", str(map_file)]) == 0
-    assert capsys.readouterr().out.count("unchanged") == 7
+    assert capsys.readouterr().out.count("unchanged") == 8
 
 
 def test_check_mode(map_file, capsys):
     assert main(["generate", str(map_file), "--check"]) == 1
-    assert capsys.readouterr().out.count("outdated") == 7
+    assert capsys.readouterr().out.count("outdated") == 8
     assert not (map_file.parent / "reg_map.h").exists()
     main(["generate", str(map_file)])
     assert main(["generate", str(map_file), "--check"]) == 0
