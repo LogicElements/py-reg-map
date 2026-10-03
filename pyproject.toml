@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "py-reg-map"
-version = "0.1.0"
+version = "0.1.1"
 description = "Register map generator for embedded firmware (C storage, LeBin and Modbus RTU JSON)"
 readme = "README.md"
 license = "MIT"
