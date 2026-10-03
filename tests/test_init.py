@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from helpers import EXAMPLE
 
@@ -34,6 +36,16 @@ def test_cli_init_rejects_a_bad_name(tmp_path, capsys):
     assert main(["init", "1bad", "-o", str(tmp_path / "x.yaml")]) == 1
     assert not (tmp_path / "x.yaml").exists()
     assert "device name" in capsys.readouterr().err
+
+
+def test_init_writes_the_schema_next_to_the_map(tmp_path):
+    target = tmp_path / "sub" / "dev.yaml"
+    target.parent.mkdir()
+    assert main(["init", "Dev", "-o", str(target)]) == 0
+    schema = target.parent / "regmap.schema.json"
+    assert json.loads(schema.read_text(encoding="utf-8"))["title"] == "RegisterMap"
+    first = target.read_text(encoding="utf-8").splitlines()[0]
+    assert first == "# yaml-language-server: $schema=regmap.schema.json"
 
 
 def test_generated_init_map_generates_outputs(tmp_path):

@@ -1,17 +1,16 @@
 """Command line interface: regmap generate | init | import-xlsx | schema."""
 
 import argparse
-import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
 
 from regmap import __version__
 from regmap.check import PreviousOutputError, breaking_changes, format_changes
-from regmap.model import MapError, RegisterMap, load_map, load_map_text
+from regmap.model import MapError, load_map, load_map_text
 from regmap.outputs import render_outputs
 from regmap.resolve import resolve
-from regmap.scaffold import new_map_text
+from regmap.scaffold import SCHEMA_FILE, new_map_text, schema_text
 from regmap.templating import TemplateError
 from regmap.writer import encode, stale, write
 
@@ -65,7 +64,7 @@ def _generate(args: argparse.Namespace) -> int:
 
 
 def _schema(args: argparse.Namespace) -> int:
-    text = json.dumps(RegisterMap.model_json_schema(), indent=2) + "\n"
+    text = schema_text()
     if args.output is None:
         sys.stdout.write(text)
     else:
@@ -88,6 +87,9 @@ def _init(args: argparse.Namespace) -> int:
         return 1
     target.write_bytes(encode(text))
     print(f"written   {target}")
+    schema = target.with_name(SCHEMA_FILE)  # always refreshed: it must match this regmap version
+    schema.write_bytes(encode(schema_text()))
+    print(f"written   {schema}")
     return 0
 
 
@@ -133,7 +135,7 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--check", action="store_true", help="only check that outputs are current")
     gen.set_defaults(func=_generate)
 
-    ini = sub.add_parser("init", help="create a new register map from the starter map")
+    ini = sub.add_parser("init", help="create a new register map and its JSON Schema")
     ini.add_argument("name", help="device name (C identifier), used for output file names")
     ini.add_argument("-o", "--output", type=Path, help="YAML file to write (default: <name>.yaml)")
     ini.add_argument("--force", action="store_true", help="overwrite an existing YAML file")

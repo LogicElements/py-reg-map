@@ -137,11 +137,18 @@ error: vms1511.yaml: 2 problem(s)
 
 ## Editor support
 
-`regmap schema -o regmap.schema.json` writes a JSON Schema of this format. With the VS Code
-YAML extension, add this first line to the map for completion and validation while typing:
+`regmap schema -o regmap.schema.json` writes a JSON Schema of this format; `regmap init` writes
+it next to every new map.
 
-```yaml
-# yaml-language-server: $schema=regmap.schema.json
-```
+- **VS Code** (Red Hat YAML extension): the first line of the map selects the schema, relative
+  to the map file. `regmap init` adds it; for other maps add it by hand:
 
-The importer does not add this line.
+  ```yaml
+  # yaml-language-server: $schema=regmap.schema.json
+  ```
+
+- **PyCharm** ignores that comment. Add the schema in Settings → Languages & Frameworks →
+  Schemas and DNS → JSON Schema: choose `regmap.schema.json`, schema version 2020-12 or 2019-09,
+  and map it to the map file (or a file pattern such as `*.yaml`).
+
+Regenerate the schema after upgrading `regmap`. The importer does not add the comment.

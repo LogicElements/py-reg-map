@@ -16,7 +16,9 @@ current directory; an existing file is only overwritten with `--force`.
 
 The map is a starter map with the registers every device needs, a `generator` section listing
 all parameters (every output next to the YAML file) and the format reference in the header.
-Edit it, then run `regmap generate`.
+The first line points editors to `regmap.schema.json`, which `init` writes next to the map
+(and refreshes if it already exists), so completion and validation work straight away (see
+[yaml-format.md](yaml-format.md#editor-support)). Edit the map, then run `regmap generate`.
 
 ## `generate`
 
