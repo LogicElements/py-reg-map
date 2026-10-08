@@ -47,6 +47,8 @@ publishes them to PyPI with `twine`. It needs `build` and `twine` in `.venv`:
 | `src/regmap/cli.py` | `regmap` command line. |
 | `src/regmap/scaffold.py` | Starter map for `regmap init`. |
 | `src/regmap/importers/` | Excel import (`xlsx.py`) and the readable YAML writer (`yaml_emit.py`). |
+| `src/regmap/export_lib.py` | `regmap export-lib`: stamps and writes the firmware library. |
+| `src/regmap/firmware_lib/` | Firmware library sources: `core/` (hash-protected) and `port/` (owned by the project). |
 | `example/` | VMS-1511 workbook, its VBA outputs (reference) and `vms1511.yaml`. |
 | `doc/design/` | Design specs and implementation plans. |
 
@@ -58,6 +60,10 @@ publishes them to PyPI with `twine`. It needs `build` and `twine` in `.venv`:
   outputs in `example/`: C files byte-for-byte, JSON after the documented differences
   (`doc/differences-from-vba.md`). It also checks that importing `example/Vms1511.xlsm`
   reproduces `example/vms1511.yaml` exactly.
+- `tests/test_firmware_core.py` exports the firmware library, generates `example/vms1511.yaml`
+  and builds the core with the host `gcc` against the fake port in `tests/c/`, then runs the C
+  tests; `tests/test_firmware_ports.py` syntax-checks the STM32 ports against
+  `tests/c/hal_stub/`. Both are skipped without `gcc`.
 
 ## Starter map for `regmap init`
 

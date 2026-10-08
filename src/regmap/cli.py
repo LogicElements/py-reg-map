@@ -1,4 +1,4 @@
-"""Command line interface: regmap generate | init | import-xlsx | schema."""
+"""Command line interface: regmap generate | init | import-xlsx | export-lib | schema."""
 
 import argparse
 import sys
@@ -7,6 +7,7 @@ from pathlib import Path
 
 from regmap import __version__
 from regmap.check import PreviousOutputError, breaking_changes, format_changes
+from regmap.export_lib import ExportError, export
 from regmap.model import MapError, load_map, load_map_text
 from regmap.outputs import render_outputs
 from regmap.resolve import resolve
@@ -123,6 +124,20 @@ def _import_xlsx(args: argparse.Namespace) -> int:
     return 0
 
 
+def _export_lib(args: argparse.Namespace) -> int:
+    try:
+        report = export(args.dir, force=args.force, force_ports=args.force_ports)
+    except ExportError as exc:
+        _error(f"{len(exc.paths)} library file(s) were edited by hand, nothing written:")
+        for path in exc.paths:
+            print(f"  {path}", file=sys.stderr)
+        print("use --force to overwrite them", file=sys.stderr)
+        return 1
+    for path, status in report:
+        print(f"{status:9} {path}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="regmap", description="Register map generator")
     parser.add_argument("--version", action="version", version=f"regmap {__version__}")
@@ -146,6 +161,12 @@ def build_parser() -> argparse.ArgumentParser:
     imp.add_argument("-o", "--output", type=Path, help="YAML file to write")
     imp.add_argument("--force", action="store_true", help="overwrite an existing YAML file")
     imp.set_defaults(func=_import_xlsx)
+
+    exp = sub.add_parser("export-lib", help="write the firmware communication library")
+    exp.add_argument("dir", type=Path, help="target directory in the firmware project")
+    exp.add_argument("--force", action="store_true", help="overwrite edited library core files")
+    exp.add_argument("--force-ports", action="store_true", help="overwrite port/config files")
+    exp.set_defaults(func=_export_lib)
 
     sch = sub.add_parser("schema", help="print the JSON Schema of the YAML format")
     sch.add_argument("-o", "--output", type=Path, help="write the schema to this file")

@@ -4,6 +4,7 @@
 regmap init NAME [-o MAP.yaml] [--force]
 regmap generate MAP.yaml [--out DIR] [--allow-id-change] [--check]
 regmap import-xlsx WORKBOOK.xlsm [-o MAP.yaml] [--force]
+regmap export-lib DIR [--force] [--force-ports]
 regmap schema [-o FILE]
 regmap --version
 ```
@@ -45,6 +46,14 @@ Converts a legacy Excel workbook into a YAML map, see [import-xlsx.md](import-xl
 `-o` defaults to `<workbook name in lower case>.yaml` next to the workbook; an existing file
 is overwritten only with `--force`. Requires the `xlsx` extra.
 
+## `export-lib`
+
+Writes the firmware communication library (LeBin, Modbus RTU slave, firmware upgrade,
+register access and STM32 ports) into `DIR`, see [firmware-lib.md](firmware-lib.md). Core
+files are updated on re-export unless they were edited by hand (then nothing is written and
+the exit code is 1; `--force` overwrites them). Port and configuration files are written only
+when missing (`--force-ports` overwrites them).
+
 ## `schema`
 
 Prints the JSON Schema of the YAML format, or writes it to `FILE` (see
@@ -55,5 +64,5 @@ Prints the JSON Schema of the YAML format, or writes it to `FILE` (see
 | code | meaning |
 |---|---|
 | 0 | success |
-| 1 | invalid map, template error, breaking change, `--check` found differences, import failed |
+| 1 | invalid map, template error, breaking change, `--check` found differences, import failed, library file edited by hand |
 | 2 | bad arguments or input file not found |

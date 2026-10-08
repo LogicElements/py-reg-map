@@ -16,6 +16,8 @@ vms1511.yaml --load + validate--> model --resolve--> derived values --generators
 | [outputs.md](outputs.md) | Every generated file and its format. |
 | [templates.md](templates.md) | Default templates, project templates, placeholders. |
 | [cli.md](cli.md) | Commands, options, destinations, exit codes. |
+| [firmware-lib.md](firmware-lib.md) | Firmware library from `regmap export-lib`: LeBin, Modbus RTU slave, upgrade, integration. |
+| [firmware-porting.md](firmware-porting.md) | Port contract and porting to other MCU families. |
 | [stability-check.md](stability-check.md) | Protection against changed register IDs and Modbus addresses. |
 | [import-xlsx.md](import-xlsx.md) | Migrating an Excel/VBA register map. |
 | [differences-from-vba.md](differences-from-vba.md) | Intentional differences from the former VBA outputs. |

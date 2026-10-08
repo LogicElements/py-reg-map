@@ -47,6 +47,12 @@ regmap generate Documents/vms1511.yaml --check              # CI: are the commit
 regmap generate Documents/vms1511.yaml --allow-id-change    # accept intended ID/Modbus changes
 ```
 
+Add the firmware communication library (LeBin, Modbus RTU slave) to the firmware project:
+
+```sh
+regmap export-lib Core/RegMap
+```
+
 Editor completion for the YAML format:
 
 ```sh
@@ -56,7 +62,7 @@ regmap schema -o Documents/regmap.schema.json
 ## Documentation
 
 Start at [doc/index.md](doc/index.md): [YAML format](doc/yaml-format.md),
-[command line](doc/cli.md), [outputs](doc/outputs.md) and
+[command line](doc/cli.md), [outputs](doc/outputs.md), [firmware library](doc/firmware-lib.md) and
 [development guide](doc/development.md).
 
 ## License
